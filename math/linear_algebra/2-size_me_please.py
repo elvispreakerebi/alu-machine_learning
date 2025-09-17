@@ -12,4 +12,3 @@ def matrix_shape(matrix):
         matrix = matrix[0]
     return shape
 
-
