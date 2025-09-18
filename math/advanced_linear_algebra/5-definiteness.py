@@ -50,5 +50,3 @@ def definiteness(matrix):
     if any_pos and any_neg:
         return "Indefinite"
     return None
-
-
