@@ -13,7 +13,10 @@ def _determinant(matrix):
         return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]
     det = 0
     for j, elem in enumerate(matrix[0]):
-        minor = [[matrix[i][k] for k in range(n) if k != j] for i in range(1, n)]
+        minor = [
+            [matrix[i][k] for k in range(n) if k != j]
+            for i in range(1, n)
+        ]
         det += ((-1) ** j) * elem * _determinant(minor)
     return det
 
