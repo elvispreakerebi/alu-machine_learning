@@ -1,14 +1,8 @@
 #!/usr/bin/env python3
-"""Determinant of a matrix.
-
-Provides a function `determinant(matrix)` that computes the determinant of a
-square matrix represented as a list of lists.
-"""
-
-from typing import List
+"""Determinant of a matrix without imports."""
 
 
-def determinant(matrix: List[List[float]]) -> float:
+def determinant(matrix):
     """Calculate the determinant of a matrix.
 
     Args:
