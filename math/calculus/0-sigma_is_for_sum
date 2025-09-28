@@ -2,19 +2,15 @@
 """
 Sigma is for Sum
 
-This script prints the correct expansion (as a textual expression) for the
-summation Σ_{i=2}^{5} i. According to the definition of sigma notation,
-we list and add each integer starting from the lower bound (2) up to the
-upper bound (5), inclusive.
-
-Expected output:
-2 + 3 + 4 + 5
+This script prints the index (1-based) of the correct expansion for
+the summation Σ_{i=2}^{5} i, given a multiple‑choice list. The correct
+option corresponds to "2 + 3 + 4 + 5", which is choice 3.
 """
 
 
 def main():
-    """Print the expansion of Σ_{i=2}^{5} i as a string expression."""
-    print("2 + 3 + 4 + 5")
+    """Print the 1-based index of the correct expansion option."""
+    print("3")
 
 
 if __name__ == "__main__":
