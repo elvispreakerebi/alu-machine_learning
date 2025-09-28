@@ -1,17 +1,1 @@
-#!/usr/bin/env python3
-"""
-Sigma is for Sum
-
-This script prints the index (1-based) of the correct expansion for
-the summation Σ_{i=2}^{5} i, given a multiple‑choice list. The correct
-option corresponds to "2 + 3 + 4 + 5", which is choice 3.
-"""
-
-
-def main():
-    """Print the 1-based index of the correct expansion option."""
-    print("3")
-
-
-if __name__ == "__main__":
-    main()
+3
