@@ -69,3 +69,28 @@ class Binomial:
             self.n = int(est_n)
             # Recalculate p using mean and integer n
             self.p = float(m / float(self.n))
+
+    def pmf(self, k):
+        """Return the PMF value for k successes.
+
+        If k is not an int, casts to int. Returns 0 when k is outside [0, n].
+        """
+        try:
+            if not isinstance(k, int):
+                k = int(k)
+        except Exception:
+            return 0
+
+        if k < 0 or k > self.n:
+            return 0
+
+        # Compute n choose k using an integer-safe multiplicative formula
+        kk = k if k <= self.n - k else self.n - k
+        comb = 1
+        i = 1
+        while i <= kk:
+            comb = comb * (self.n - kk + i) // i
+            i += 1
+
+        q = 1.0 - self.p
+        return comb * (self.p ** k) * (q ** (self.n - k))
