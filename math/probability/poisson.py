@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Poisson distribution class implementation (no external imports).
+"""Poisson distribution class implementation.
 
 This module provides a `Poisson` class that estimates the rate parameter
 `lambtha` from data or uses a provided positive value.
