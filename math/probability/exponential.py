@@ -59,3 +59,20 @@ class Exponential:
         # e^{-lambtha * x} = 1 / (e^{lambtha * x})
         exp_term = 1.0 / (e_const ** (self.lambtha * x))
         return self.lambtha * exp_term
+
+    def cdf(self, x):
+        """Return the CDF value at time x.
+
+        For x < 0, returns 0.
+        """
+        try:
+            x = float(x)
+        except Exception:
+            return 0
+
+        if x < 0.0:
+            return 0
+
+        e_const = 2.7182818285
+        exp_term = 1.0 / (e_const ** (self.lambtha * x))
+        return 1.0 - exp_term
