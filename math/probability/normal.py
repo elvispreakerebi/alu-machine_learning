@@ -84,3 +84,40 @@ class Normal:
         denom = self.stddev * (2.0 * pi_const) ** 0.5
         exp_term = e_const ** (-0.5 * z * z)
         return exp_term / denom
+
+    @staticmethod
+    def _erf(x):
+        """Approximate the error function erf(x) with A&S formula.
+
+        Uses Abramowitz and Stegun formula 7.1.26.
+        """
+        # Save the sign of x
+        sign = 1.0
+        if x < 0:
+            sign = -1.0
+            x = -x
+
+        # Constants
+        p = 0.3275911
+        a1 = 0.254829592
+        a2 = -0.284496736
+        a3 = 1.421413741
+        a4 = -1.453152027
+        a5 = 1.061405429
+
+        t = 1.0 / (1.0 + p * x)
+        poly = (((((a5 * t) + a4) * t + a3) * t + a2) * t + a1) * t
+        e_const = 2.7182818285
+        exp_term = e_const ** (-(x * x))
+        y = 1.0 - poly * exp_term
+        return sign * y
+
+    def cdf(self, x):
+        """Return the CDF value for x.
+
+        Uses Φ(x) = 0.5 * [1 + erf((x−μ)/(σ√2))].
+        """
+        x = float(x)
+        z = (x - self.mean) / self.stddev
+        sqrt2 = 2.0 ** 0.5
+        return 0.5 * (1.0 + self._erf(z / sqrt2))
