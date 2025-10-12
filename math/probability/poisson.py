@@ -78,3 +78,24 @@ class Poisson:
         exp_neg_lam = 1.0 / (e_const ** self.lambtha)
 
         return exp_neg_lam * lam_pow_k / float(fact)
+
+    def cdf(self, k):
+        """Return the CDF value for k successes.
+
+        Sums PMF from 0..k. Casts non-int k to int; returns 0 if k < 0.
+        """
+        try:
+            if not isinstance(k, int):
+                k = int(k)
+        except Exception:
+            return 0
+
+        if k < 0:
+            return 0
+
+        total = 0.0
+        i = 0
+        while i <= k:
+            total += self.pmf(i)
+            i += 1
+        return total
