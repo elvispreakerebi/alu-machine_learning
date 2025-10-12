@@ -55,4 +55,3 @@ class Normal:
 
             self.mean = float(mu)
             self.stddev = float(sigma)
-            
