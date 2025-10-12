@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Poisson distribution class implementation.
+"""Poisson distribution class.
 
 This module provides a `Poisson` class that estimates the rate parameter
 `lambtha` from data or uses a provided positive value.
@@ -57,7 +57,7 @@ class Poisson:
         if k < 0:
             return 0
 
-        # Use a constant for Euler's number (no imports allowed)
+        # Use a numeric constant for Euler's number (no external modules)
         e_const = 2.7182818285
 
         # Compute k! iteratively
