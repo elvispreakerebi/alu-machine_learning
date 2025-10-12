@@ -55,3 +55,19 @@ class Normal:
 
             self.mean = float(mu)
             self.stddev = float(sigma)
+
+    def z_score(self, x):
+        """Return the z-score of value x.
+
+        z = (x - mean) / stddev
+        """
+        x = float(x)
+        return (x - self.mean) / self.stddev
+
+    def x_value(self, z):
+        """Return the x-value for a given z-score.
+
+        x = z * stddev + mean
+        """
+        z = float(z)
+        return z * self.stddev + self.mean
