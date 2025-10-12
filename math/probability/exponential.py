@@ -40,3 +40,22 @@ class Exponential:
             if mean <= 0:
                 raise ValueError("lambtha must be a positive value")
             self.lambtha = float(1.0 / mean)
+
+    def pdf(self, x):
+        """Return the PDF value at time x.
+
+        For x < 0, returns 0.
+        """
+        try:
+            x = float(x)
+        except Exception:
+            return 0
+
+        if x < 0.0:
+            return 0
+
+        # Use numeric constant for Euler's number
+        e_const = 2.7182818285
+        # e^{-lambtha * x} = 1 / (e^{lambtha * x})
+        exp_term = 1.0 / (e_const ** (self.lambtha * x))
+        return self.lambtha * exp_term
