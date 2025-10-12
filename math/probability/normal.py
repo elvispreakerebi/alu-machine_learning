@@ -79,8 +79,8 @@ class Normal:
         """
         x = float(x)
         z = (x - self.mean) / self.stddev
-        pi_const = 3.1415926536
-        e_const = 2.7182818285
+        pi_const = 3.141592653589793
+        e_const = 2.718281828459045
         denom = self.stddev * (2.0 * pi_const) ** 0.5
         exp_term = e_const ** (-0.5 * z * z)
         return exp_term / denom
@@ -107,7 +107,7 @@ class Normal:
 
         t = 1.0 / (1.0 + p * x)
         poly = (((((a5 * t) + a4) * t + a3) * t + a2) * t + a1) * t
-        e_const = 2.7182818285
+        e_const = 2.718281828459045
         exp_term = e_const ** (-(x * x))
         y = 1.0 - poly * exp_term
         return sign * y
