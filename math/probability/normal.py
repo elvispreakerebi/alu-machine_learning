@@ -71,3 +71,16 @@ class Normal:
         """
         z = float(z)
         return z * self.stddev + self.mean
+
+    def pdf(self, x):
+        """Return the PDF value for x.
+
+        Uses 1/(σ√(2π)) · e^{-(1/2)((x−μ)/σ)^2} with numeric constants.
+        """
+        x = float(x)
+        z = (x - self.mean) / self.stddev
+        pi_const = 3.1415926536
+        e_const = 2.7182818285
+        denom = self.stddev * (2.0 * pi_const) ** 0.5
+        exp_term = e_const ** (-0.5 * z * z)
+        return exp_term / denom
