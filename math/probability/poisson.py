@@ -42,3 +42,39 @@ class Poisson:
             for x in data:
                 total += x
             self.lambtha = float(total / float(len(data)))
+
+    def pmf(self, k):
+        """Return the PMF value for k successes.
+
+        If k is not an int, it is cast to int. Returns 0 for out-of-range k.
+        """
+        try:
+            if not isinstance(k, int):
+                k = int(k)
+        except Exception:
+            return 0
+
+        if k < 0:
+            return 0
+
+        # Use a constant for Euler's number (no imports allowed)
+        e_const = 2.7182818285
+
+        # Compute k! iteratively
+        fact = 1
+        i = 1
+        while i <= k:
+            fact *= i
+            i += 1
+
+        # Compute lambda^k
+        lam_pow_k = 1.0
+        i = 0
+        while i < k:
+            lam_pow_k *= self.lambtha
+            i += 1
+
+        # Compute e^{-lambda} as 1/(e^{lambda})
+        exp_neg_lam = 1.0 / (e_const ** self.lambtha)
+
+        return exp_neg_lam * lam_pow_k / float(fact)
