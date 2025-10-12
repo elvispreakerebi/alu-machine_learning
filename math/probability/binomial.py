@@ -94,3 +94,26 @@ class Binomial:
 
         q = 1.0 - self.p
         return comb * (self.p ** k) * (q ** (self.n - k))
+
+    def cdf(self, k):
+        """Return the CDF value for k successes.
+
+        Sums pmf(i) for i from 0 to k. Casts non-int k to int. Returns 0 when
+        k < 0. If k exceeds n, the summation saturates at 1.
+        """
+        try:
+            if not isinstance(k, int):
+                k = int(k)
+        except Exception:
+            return 0
+
+        if k < 0:
+            return 0
+
+        total = 0.0
+        i = 0
+        limit = k if k <= self.n else self.n
+        while i <= limit:
+            total += self.pmf(i)
+            i += 1
+        return total
