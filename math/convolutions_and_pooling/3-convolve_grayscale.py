@@ -8,8 +8,7 @@ import numpy as np
 
 def convolve_grayscale(images, kernel, padding='same', stride=(1, 1)):
     """
-    Performs a convolution on grayscale images with stride and 
-    various paddings.
+    Performs a convolution on grayscale images with stridevarious paddings.
 
     Args:
         images (np.ndarray): (m, h, w) input images
