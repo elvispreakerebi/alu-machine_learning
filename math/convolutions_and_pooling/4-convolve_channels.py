@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Convolution over (m, h, w, c) images with channel-wise kernel (two for loops max)."""
+"""
+Convolution over (m, h, w, c) images with channel-wise kernel (
+2 for loops max).
+"""
 import numpy as np
+
 
 def convolve_channels(images, kernel, padding='same', stride=(1, 1)):
     """Performs a convolution on color images with multi-channel kernels.
@@ -21,9 +25,10 @@ def convolve_channels(images, kernel, padding='same', stride=(1, 1)):
     elif padding == 'same':
         ph = ((h - 1) * sh + kh - h) // 2
         pw = ((w - 1) * sw + kw - w) // 2
-    else:  # 'valid'
+    else:
         ph, pw = 0, 0
-    images_pad = np.pad(images, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
+    images_pad = np.pad(
+        images, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
     h_pad, w_pad = images_pad.shape[1], images_pad.shape[2]
     h_out = (h_pad - kh) // sh + 1
     w_out = (w_pad - kw) // sw + 1
