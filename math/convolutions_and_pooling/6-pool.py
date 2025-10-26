@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Pooling on multi-channel images with max or average; only 2 for loops used."""
+"""
+Pooling on multi-channel images with max or average.
+Only 2 for loops used (over spatial output indices).
+"""
 import numpy as np
+
 
 def pool(images, kernel_shape, stride, mode='max'):
     """Performs pooling on images using the specified mode and kernel/stride.
@@ -25,6 +29,6 @@ def pool(images, kernel_shape, stride, mode='max'):
             window = images[:, i_start:i_start+kh, j_start:j_start+kw, :]
             if mode == 'max':
                 pooled[:, i, j, :] = np.max(window, axis=(1, 2))
-            else:  # average
+            else:
                 pooled[:, i, j, :] = np.mean(window, axis=(1, 2))
     return pooled
