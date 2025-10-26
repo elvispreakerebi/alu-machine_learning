@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-"""Multi-channel, multi-kernel convolution, max 3 for loops (i, j, k)."""
+"""
+Multi-channel, multi-kernel convolution.
+Max 3 for loops (over i, j, k) as permitted.
+"""
 import numpy as np
+
 
 def convolve(images, kernels, padding='same', stride=(1, 1)):
     """Performs a convolution on images with multiple kernels.
@@ -23,7 +27,8 @@ def convolve(images, kernels, padding='same', stride=(1, 1)):
         pw = ((w - 1) * sw + kw - w) // 2
     else:
         ph, pw = 0, 0
-    images_pad = np.pad(images, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
+    images_pad = np.pad(
+        images, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
     h_pad, w_pad = images_pad.shape[1], images_pad.shape[2]
     h_out = (h_pad - kh) // sh + 1
     w_out = (w_pad - kw) // sw + 1
@@ -33,5 +38,6 @@ def convolve(images, kernels, padding='same', stride=(1, 1)):
             for k in range(nc):
                 hs, ws = i * sh, j * sw
                 window = images_pad[:, hs:hs+kh, ws:ws+kw, :]
-                output[:, i, j, k] = np.sum(window * kernels[:, :, :, k], axis=(1, 2, 3))
+                output[:, i, j, k] = np.sum(
+                    window * kernels[:, :, :, k], axis=(1, 2, 3))
     return output
