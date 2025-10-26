@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""General grayscale image convolution with stride and padding (two loops max)."""
+"""
+General grayscale image convolution with stride and padding.
+At most two loops used (over output i, j).
+"""
 import numpy as np
 
+
 def convolve_grayscale(images, kernel, padding='same', stride=(1, 1)):
-    """Performs a convolution on grayscale images with stride and various paddings.
+    """
+    Performs a convolution on grayscale images with stride and 
+    various paddings.
 
     Args:
         images (np.ndarray): (m, h, w) input images
@@ -23,8 +29,8 @@ def convolve_grayscale(images, kernel, padding='same', stride=(1, 1)):
         pw = ((w - 1) * sw + kw - w) // 2
     else:  # 'valid'
         ph, pw = 0, 0
-    # Pad images
-    images_padded = np.pad(images, ((0, 0), (ph, ph), (pw, pw)), mode='constant')
+    images_padded = np.pad(
+        images, ((0, 0), (ph, ph), (pw, pw)), mode='constant')
     h_padded = images_padded.shape[1]
     w_padded = images_padded.shape[2]
     h_out = (h_padded - kh) // sh + 1
