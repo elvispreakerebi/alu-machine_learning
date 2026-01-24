@@ -4,7 +4,6 @@ Module for creating a variational autoencoder.
 """
 
 import tensorflow.keras as K
-import tensorflow as tf
 
 
 def autoencoder(input_dims, hidden_layers, latent_dims):
@@ -40,8 +39,8 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     # Sampling layer
     def sampling(args):
         mu, log_sig = args
-        epsilon = tf.random.normal(tf.shape(mu))
-        return mu + tf.exp(log_sig / 2) * epsilon
+        epsilon = K.backend.random_normal(K.backend.shape(mu))
+        return mu + K.backend.exp(log_sig / 2) * epsilon
     
     encoded = K.layers.Lambda(sampling, output_shape=(latent_dims,), name='sampling')([mu, log_sig])
     
@@ -70,7 +69,7 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     auto = K.Model(auto_input, auto_output, name='autoencoder')
     
     # Add KL divergence loss
-    kl_loss = -0.5 * tf.reduce_mean(1 + log_sig_output - tf.square(mu_output) - tf.exp(log_sig_output))
+    kl_loss = -0.5 * K.backend.mean(1 + log_sig_output - K.backend.square(mu_output) - K.backend.exp(log_sig_output))
     auto.add_loss(kl_loss)
     
     # Compile the autoencoder
