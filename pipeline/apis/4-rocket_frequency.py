@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Display the number of launches per rocket using the (unofficial) SpaceX API.
-Output: one line per rocket, "Rocket Name: count", sorted by count desc then name A-Z.
+Output: one line per rocket "Name: count", sorted by count desc then name A-Z.
 """
 import requests
 
