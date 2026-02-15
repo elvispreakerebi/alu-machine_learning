@@ -23,7 +23,7 @@ def main():
             try:
                 reset_ts = int(reset)
                 minutes = max(0, (reset_ts - int(time.time())) // 60)
-                print(f"Reset in {minutes} min")
+                print("Reset in {} min".format(minutes))
             except (ValueError, TypeError):
                 print("Reset in 0 min")
         else:
