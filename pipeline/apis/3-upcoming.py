@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Display the upcoming SpaceX launch using the (unofficial) SpaceX API.
-Format: <launch name> (<date local>) <rocket name> - <launchpad name> (<locality>)
+Format: <launch name> (<date local>) <rocket name> - <launchpad> (<locality>)
 """
 import time
 import requests
@@ -12,7 +12,6 @@ def main():
     Fetch upcoming launches from SpaceX API; print the soonest one.
     Format: launch name (date_local) rocket name - launchpad name (locality).
     """
-    now = int(time.time())
     try:
         r = requests.get(
             "https://api.spacexdata.com/v5/launches/upcoming",
@@ -24,12 +23,16 @@ def main():
         return
     if not launches:
         return
-    # Soonest from now: date_unix >= now, then min; if none future, take min date_unix (API order for ties)
-    future = [l for l in launches if (l.get("date_unix") or 0) >= now]
+    # Soonest: date_unix >= now, else min; same date = first in API order
+    now_ts = int(time.time())
+    future = [
+        launch for launch in launches
+        if (launch.get("date_unix") or 0) >= now_ts
+    ]
     if future:
-        launch = min(future, key=lambda l: l.get("date_unix", 0))
+        launch = min(future, key=lambda launch: launch.get("date_unix", 0))
     else:
-        launch = min(launches, key=lambda l: l.get("date_unix") or 0)
+        launch = min(launches, key=lambda launch: launch.get("date_unix") or 0)
     name = launch.get("name") or ""
     date_local = launch.get("date_local") or ""
     rocket_id = launch.get("rocket")
@@ -49,10 +52,8 @@ def main():
     locality = ""
     if launchpad_id:
         try:
-            rp = requests.get(
-                "https://api.spacexdata.com/v4/launchpads/{}".format(launchpad_id),
-                timeout=10,
-            )
+            pad_url = "https://api.spacexdata.com/v4/launchpads/{}"
+            rp = requests.get(pad_url.format(launchpad_id), timeout=10)
             rp.raise_for_status()
             pad = rp.json()
             launchpad_name = pad.get("name") or ""
