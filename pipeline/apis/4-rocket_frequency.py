@@ -7,6 +7,10 @@ import requests
 
 
 def main():
+    """
+    Fetch all SpaceX launches; count per rocket; print names and counts.
+    Sorted by count descending, then rocket name A-Z.
+    """
     try:
         r = requests.post(
             "https://api.spacexdata.com/v5/launches/query",
@@ -29,7 +33,7 @@ def main():
     for rid in count_by_id:
         try:
             rr = requests.get(
-                f"https://api.spacexdata.com/v4/rockets/{rid}",
+                "https://api.spacexdata.com/v4/rockets/{}".format(rid),
                 timeout=10,
             )
             rr.raise_for_status()
@@ -47,7 +51,7 @@ def main():
         key=lambda x: (-x[1], x[0]),
     )
     for name, count in items:
-        print(f"{name}: {count}")
+        print("{}: {}".format(name, count))
 
 
 if __name__ == "__main__":

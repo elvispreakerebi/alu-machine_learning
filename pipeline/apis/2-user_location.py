@@ -9,6 +9,10 @@ import requests
 
 
 def main():
+    """
+    Fetch GitHub user URL from argv; print location, "Not found", or rate limit.
+    Handles 200 (location), 404 (Not found), 403 (Reset in X min from header).
+    """
     if len(sys.argv) < 2:
         return
     url = sys.argv[1]

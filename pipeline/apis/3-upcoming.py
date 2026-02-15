@@ -8,6 +8,10 @@ import requests
 
 
 def main():
+    """
+    Fetch upcoming launches from SpaceX API; print the soonest one.
+    Format: launch name (date_local) rocket name - launchpad name (locality).
+    """
     now = int(time.time())
     try:
         r = requests.get(
@@ -34,7 +38,7 @@ def main():
     if rocket_id:
         try:
             rr = requests.get(
-                f"https://api.spacexdata.com/v4/rockets/{rocket_id}",
+                "https://api.spacexdata.com/v4/rockets/{}".format(rocket_id),
                 timeout=10,
             )
             rr.raise_for_status()
@@ -46,7 +50,7 @@ def main():
     if launchpad_id:
         try:
             rp = requests.get(
-                f"https://api.spacexdata.com/v4/launchpads/{launchpad_id}",
+                "https://api.spacexdata.com/v4/launchpads/{}".format(launchpad_id),
                 timeout=10,
             )
             rp.raise_for_status()
@@ -55,7 +59,8 @@ def main():
             locality = pad.get("locality") or ""
         except (requests.RequestException, ValueError, KeyError):
             pass
-    print(f"{name} ({date_local}) {rocket_name} - {launchpad_name} ({locality})")
+    print("{} ({}) {} - {} ({})".format(
+        name, date_local, rocket_name, launchpad_name, locality))
 
 
 if __name__ == "__main__":
