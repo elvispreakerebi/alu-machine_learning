@@ -53,8 +53,8 @@ class NST:
     @staticmethod
     def scale_image(image):
         """
-        Rescales an image such that its pixels values are between 0 and 1
-        and its largest side is 512 pixels.
+        Rescales an image such that its largest side is 512 pixels, then
+        rescales pixel values from [0, 255] to [0, 1] after bicubic resize.
 
         Args:
             image (np.ndarray): Image array of shape (h, w, 3).
@@ -77,8 +77,8 @@ class NST:
             h_new = int(np.round(h * 512.0 / w))
 
         img = tf.convert_to_tensor(image, dtype=tf.float32)
-        img = img / 255.0
         img = tf.expand_dims(img, axis=0)
         img = tf.image.resize_bicubic(img, size=(h_new, w_new))
+        img = img / 255.0
         img = tf.clip_by_value(img, 0.0, 1.0)
         return img
