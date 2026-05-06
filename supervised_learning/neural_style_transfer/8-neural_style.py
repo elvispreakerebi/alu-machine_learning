@@ -95,7 +95,7 @@ class NST:
         E_l = (1 / C_l^2) * sum_ij (G_ij - A_ij)^2
 
         Args:
-            style_output (tf.Tensor or tf.Variable): Layer activations (1,h,w,c).
+            style_output (tf.Tensor or tf.Variable): Activations (1, h, w, c).
             gram_target (tf.Tensor or tf.Variable): Target Gram (1, c, c).
 
         Returns:
@@ -160,8 +160,8 @@ class NST:
         if (not isinstance(style_outputs, list) or
                 len(style_outputs) != l_len):
             raise TypeError(
-                "style_outputs must be a list with a length of {l} where "
-                "{l} is the length of self.style_layers".format(l=l_len)
+                "style_outputs must be a list with a length of {n} where "
+                "{n} is the length of self.style_layers".format(n=l_len)
             )
         weight = 1.0 / float(l_len)
         terms = []
@@ -205,7 +205,7 @@ class NST:
 
     def _forward_total_cost(self, generated_image):
         """
-        Forward pass: VGG features, style/content costs, total J (no validation).
+        Forward pass: VGG features, style/content costs, total J.
 
         Args:
             generated_image: Batch (1, nh, nw, 3) in [0, 1].
@@ -242,8 +242,8 @@ class NST:
 
         def _raise_typeerror():
             raise TypeError(
-                "generated_image must be a tensor of shape {s} where {s} is "
-                "the shape of self.content_image".format(s=s_str)
+                "generated_image must be a tensor of shape {s}".format(
+                    s=s_str)
             )
 
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)):
@@ -273,8 +273,8 @@ class NST:
 
         def _raise_typeerror():
             raise TypeError(
-                "generated_image must be a tensor of shape {s} where {s} is "
-                "the shape of self.content_image".format(s=s_str)
+                "generated_image must be a tensor of shape {s}".format(
+                    s=s_str)
             )
 
         if not isinstance(generated_image, (tf.Tensor, tf.Variable)):
@@ -289,7 +289,8 @@ class NST:
             tape_cls = tf.contrib.eager.GradientTape
 
         with tape_cls() as tape:
-            tape.watch(generated_image)
+            if not isinstance(generated_image, tf.Variable):
+                tape.watch(generated_image)
             J_total, J_content, J_style = self._forward_total_cost(
                 generated_image)
 
