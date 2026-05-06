@@ -62,13 +62,20 @@ class NST:
         Builds a Keras model from VGG19 (no top) with the same input as VGG19
         and outputs the style layer activations followed by the content layer.
         Max-pooling layers are replaced by average pooling (NST convention).
+        Layer outputs are taken from the rebuilt forward path (not
+        get_layer().output on reused layers, which can reference the old
+        VGG graph).
         """
+        style_names = list(self.style_layers)
+        content_name = self.content_layer
+
         vgg = tf.keras.applications.VGG19(
             include_top=False,
             weights='imagenet',
         )
         vgg.trainable = False
         x = vgg.input
+        tensors_by_layer = {}
         for layer in vgg.layers[1:]:
             if isinstance(layer, tf.keras.layers.MaxPooling2D):
                 x = tf.keras.layers.AveragePooling2D(
@@ -79,12 +86,12 @@ class NST:
                 )(x)
             else:
                 x = layer(x)
-        base = tf.keras.Model(inputs=vgg.input, outputs=x)
-        outputs = (
-            [base.get_layer(name).output for name in self.style_layers] +
-            [base.get_layer(self.content_layer).output]
+            tensors_by_layer[layer.name] = x
+        out_tensors = (
+            [tensors_by_layer[name] for name in style_names] +
+            [tensors_by_layer[content_name]]
         )
-        self.model = tf.keras.Model(inputs=base.input, outputs=outputs)
+        self.model = tf.keras.Model(inputs=vgg.input, outputs=out_tensors)
 
     def generate_features(self):
         """
@@ -100,13 +107,20 @@ class NST:
         vgg19 = tf.keras.applications.vgg19
         style_pre = vgg19.preprocess_input(self.style_image * 255.0)
         content_pre = vgg19.preprocess_input(self.content_image * 255.0)
-        style_outputs = self.model(style_pre)
-        self.style_features = [style_outputs[i] for i in range(n_style)]
+        style_out = self.model(style_pre)
+        if not isinstance(style_out, (list, tuple)):
+            style_list = [style_out]
+        else:
+            style_list = list(style_out)
+        self.style_features = [style_list[i] for i in range(n_style)]
         self.gram_style_features = [
-            self.gram_matrix(style_outputs[i]) for i in range(n_style)
+            self.gram_matrix(style_list[i]) for i in range(n_style)
         ]
-        content_outputs = self.model(content_pre)
-        self.content_feature = content_outputs[-1]
+        content_out = self.model(content_pre)
+        if not isinstance(content_out, (list, tuple)):
+            self.content_feature = content_out
+        else:
+            self.content_feature = content_out[-1]
 
     @staticmethod
     def gram_matrix(input_layer):

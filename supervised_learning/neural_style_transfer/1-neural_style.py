@@ -58,13 +58,19 @@ class NST:
         Builds a Keras model from VGG19 (no top) with the same input as VGG19
         and outputs the style layer activations followed by the content layer.
         Max-pooling layers are replaced by average pooling (NST convention).
+        Outputs are taken from the rebuilt forward path so tensors match the
+        average-pool graph.
         """
+        style_names = list(self.style_layers)
+        content_name = self.content_layer
+
         vgg = tf.keras.applications.VGG19(
             include_top=False,
             weights='imagenet',
         )
         vgg.trainable = False
         x = vgg.input
+        tensors_by_layer = {}
         for layer in vgg.layers[1:]:
             if isinstance(layer, tf.keras.layers.MaxPooling2D):
                 x = tf.keras.layers.AveragePooling2D(
@@ -75,12 +81,12 @@ class NST:
                 )(x)
             else:
                 x = layer(x)
-        base = tf.keras.Model(inputs=vgg.input, outputs=x)
-        outputs = (
-            [base.get_layer(name).output for name in self.style_layers] +
-            [base.get_layer(self.content_layer).output]
+            tensors_by_layer[layer.name] = x
+        out_tensors = (
+            [tensors_by_layer[name] for name in style_names] +
+            [tensors_by_layer[content_name]]
         )
-        self.model = tf.keras.Model(inputs=base.input, outputs=outputs)
+        self.model = tf.keras.Model(inputs=vgg.input, outputs=out_tensors)
 
     @staticmethod
     def scale_image(image):
