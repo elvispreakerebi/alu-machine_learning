@@ -100,7 +100,7 @@ class NST:
         E_l = (1 / C_l^2) * sum_ij (G_ij - A_ij)^2
 
         Args:
-            style_output (tf.Tensor or tf.Variable): Layer activations (1,h,w,c).
+            style_output (tf.Tensor or tf.Variable): Activations (1, h, w, c).
             gram_target (tf.Tensor or tf.Variable): Target Gram (1, c, c).
 
         Returns:
@@ -165,8 +165,8 @@ class NST:
         if (not isinstance(style_outputs, list) or
                 len(style_outputs) != l_len):
             raise TypeError(
-                "style_outputs must be a list with a length of {l} where "
-                "{l} is the length of self.style_layers".format(l=l_len)
+                "style_outputs must be a list with a length of {n} where "
+                "{n} is the length of self.style_layers".format(n=l_len)
             )
         weight = 1.0 / float(l_len)
         terms = []
@@ -296,7 +296,8 @@ class NST:
             tape_cls = tf.contrib.eager.GradientTape
 
         with tape_cls() as tape:
-            tape.watch(generated_image)
+            if not isinstance(generated_image, tf.Variable):
+                tape.watch(generated_image)
             J_total, J_content, J_style, J_var = self._forward_total_cost(
                 generated_image)
 
@@ -334,15 +335,18 @@ class NST:
             if step <= 0 or step >= iterations:
                 raise ValueError(
                     "step must be positive and less than iterations")
-        if isinstance(lr, bool) or not isinstance(lr, (int, float)):
+        if (isinstance(lr, bool) or not isinstance(
+                lr, (int, float, np.integer, np.floating))):
             raise TypeError("lr must be a number")
         if lr <= 0:
             raise ValueError("lr must be positive")
-        if not isinstance(beta1, float):
+        if isinstance(beta1, bool) or not isinstance(
+                beta1, (float, np.floating)):
             raise TypeError("beta1 must be a float")
         if beta1 < 0.0 or beta1 > 1.0:
             raise ValueError("beta1 must be in the range [0, 1]")
-        if not isinstance(beta2, float):
+        if isinstance(beta2, bool) or not isinstance(
+                beta2, (float, np.floating)):
             raise TypeError("beta2 must be a float")
         if beta2 < 0.0 or beta2 > 1.0:
             raise ValueError("beta2 must be in the range [0, 1]")
