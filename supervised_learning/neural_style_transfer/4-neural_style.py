@@ -95,7 +95,7 @@ class NST:
         E_l = (1 / C_l^2) * sum_ij (G_ij - A_ij)^2
 
         Args:
-            style_output (tf.Tensor or tf.Variable): Layer activations (1,h,w,c).
+            style_output (tf.Tensor or tf.Variable): Activations (1, h, w, c).
             gram_target (tf.Tensor or tf.Variable): Target Gram (1, c, c).
 
         Returns:
@@ -113,18 +113,17 @@ class NST:
         else:
             c_dim = int(c_dim)
 
-        def _gram_target_typeerror():
-            return TypeError(
-                "gram_target must be a tensor of shape [1, {c}, {c}] where "
-                "{c} is the number of channels in style_output".format(c=c_dim)
-            )
+        gmsg = (
+            "gram_target must be a tensor of shape [1, {c}, {c}]".format(
+                c=c_dim)
+        )
 
         if not isinstance(gram_target, (tf.Tensor, tf.Variable)):
-            raise _gram_target_typeerror()
+            raise TypeError(gmsg)
 
         rank_g = gram_target.shape.ndims
         if rank_g is None or rank_g != 3:
-            raise _gram_target_typeerror()
+            raise TypeError(gmsg)
 
         g0 = gram_target.shape[0]
         g1 = gram_target.shape[1]
@@ -132,16 +131,17 @@ class NST:
         if g0 is not None and g1 is not None and g2 is not None:
             if (int(g0) != 1 or int(g1) != int(g2) or
                     int(g1) != c_dim):
-                raise _gram_target_typeerror()
+                raise TypeError(gmsg)
         else:
             gt = tf.shape(gram_target)
             if (int(gt[0].numpy()) != 1 or
                     int(gt[1].numpy()) != int(gt[2].numpy()) or
                     int(gt[1].numpy()) != c_dim):
-                raise _gram_target_typeerror()
+                raise TypeError(gmsg)
 
         gram_style = self.gram_matrix(style_output)
-        return tf.reduce_mean(tf.square(gram_style - gram_target))
+        gt = tf.cast(gram_target, gram_style.dtype)
+        return tf.reduce_mean(tf.square(gram_style - gt))
 
     @staticmethod
     def gram_matrix(input_layer):
@@ -163,8 +163,9 @@ class NST:
             raise TypeError("input_layer must be a tensor of rank 4")
 
         _, h, w, c = tf.unstack(tf.shape(input_layer))
-        feats = tf.reshape(input_layer, (1, h * w, c))
-        gram = tf.matmul(feats, feats, transpose_a=True)
+        features = tf.reshape(input_layer, (-1, c))
+        gram = tf.matmul(features, features, transpose_a=True)
+        gram = tf.expand_dims(gram, 0)
         gram = gram / tf.cast(h * w, tf.float32)
         return gram
 
