@@ -36,9 +36,11 @@ class NST:
             raise TypeError(
                 "content_image must be a numpy.ndarray with shape (h, w, 3)"
             )
-        if (not isinstance(alpha, (int, float)) or alpha < 0):
+        if (isinstance(alpha, bool) or not isinstance(alpha, (int, float, np.number)) or
+                alpha < 0):
             raise TypeError("alpha must be a non-negative number")
-        if (not isinstance(beta, (int, float)) or beta < 0):
+        if (isinstance(beta, bool) or not isinstance(beta, (int, float, np.number)) or
+                beta < 0):
             raise TypeError("beta must be a non-negative number")
 
         if not tf.executing_eagerly():
@@ -68,9 +70,13 @@ class NST:
             )
 
         h, w, _ = image.shape
-        scale = 512 / max(h, w)
-        h_new = int(np.round(h * scale))
-        w_new = int(np.round(w * scale))
+        # Ensure the largest side is exactly 512 while keeping aspect ratio.
+        if h >= w:
+            h_new = 512
+            w_new = int(np.round(w * 512.0 / h))
+        else:
+            w_new = 512
+            h_new = int(np.round(h * 512.0 / w))
 
         img = tf.convert_to_tensor(image, dtype=tf.float32)
         if np.max(image) > 1:
