@@ -29,7 +29,7 @@ class NST:
             beta (float): Weight for style cost.
 
         After init, sets style_image, content_image, alpha, beta, model,
-        gram_style_features, and content_feature.
+        style_features, gram_style_features, and content_feature.
         """
         if (not isinstance(style_image, np.ndarray) or
                 style_image.ndim != 3 or style_image.shape[2] != 3):
@@ -61,31 +61,51 @@ class NST:
 
         Builds a Keras model from VGG19 (no top) with the same input as VGG19
         and outputs the style layer activations followed by the content layer.
+        Max-pooling layers are replaced by average pooling (NST convention).
         """
         vgg = tf.keras.applications.VGG19(
             include_top=False,
             weights='imagenet',
         )
         vgg.trainable = False
+        x = vgg.input
+        for layer in vgg.layers[1:]:
+            if isinstance(layer, tf.keras.layers.MaxPooling2D):
+                x = tf.keras.layers.AveragePooling2D(
+                    pool_size=layer.pool_size,
+                    strides=layer.strides,
+                    padding=layer.padding,
+                    name=layer.name,
+                )(x)
+            else:
+                x = layer(x)
+        base = tf.keras.Model(inputs=vgg.input, outputs=x)
         outputs = (
-            [vgg.get_layer(name).output for name in self.style_layers] +
-            [vgg.get_layer(self.content_layer).output]
+            [base.get_layer(name).output for name in self.style_layers] +
+            [base.get_layer(self.content_layer).output]
         )
-        self.model = tf.keras.Model(inputs=vgg.input, outputs=outputs)
+        self.model = tf.keras.Model(inputs=base.input, outputs=outputs)
 
     def generate_features(self):
         """
         Extracts style Gram matrices and content layer activations.
 
-        Sets gram_style_features from the style image's style-layer outputs
-        and content_feature from the content image's content-layer output.
+        Sets style_features and gram_style_features from the style image's
+        style-layer outputs and content_feature from the content image's
+        content-layer output.
+        Images are scaled to [0, 1] then passed through VGG preprocessing
+        (ImageNet mean-centered BGR) before the network, matching VGG19.
         """
         n_style = len(self.style_layers)
-        style_outputs = self.model(self.style_image)
+        vgg19 = tf.keras.applications.vgg19
+        style_pre = vgg19.preprocess_input(self.style_image * 255.0)
+        content_pre = vgg19.preprocess_input(self.content_image * 255.0)
+        style_outputs = self.model(style_pre)
+        self.style_features = [style_outputs[i] for i in range(n_style)]
         self.gram_style_features = [
             self.gram_matrix(style_outputs[i]) for i in range(n_style)
         ]
-        content_outputs = self.model(self.content_image)
+        content_outputs = self.model(content_pre)
         self.content_feature = content_outputs[-1]
 
     @staticmethod
