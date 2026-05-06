@@ -61,37 +61,17 @@ class NST:
 
         Builds a Keras model from VGG19 (no top) with the same input as VGG19
         and outputs the style layer activations followed by the content layer.
-        Max-pooling layers are replaced by average pooling (NST convention).
-        Layer outputs are taken from the rebuilt forward path (not
-        get_layer().output on reused layers, which can reference the old
-        VGG graph).
         """
-        style_names = list(self.style_layers)
-        content_name = self.content_layer
-
         vgg = tf.keras.applications.VGG19(
             include_top=False,
             weights='imagenet',
         )
         vgg.trainable = False
-        x = vgg.input
-        tensors_by_layer = {}
-        for layer in vgg.layers[1:]:
-            if isinstance(layer, tf.keras.layers.MaxPooling2D):
-                x = tf.keras.layers.AveragePooling2D(
-                    pool_size=layer.pool_size,
-                    strides=layer.strides,
-                    padding=layer.padding,
-                    name=layer.name,
-                )(x)
-            else:
-                x = layer(x)
-            tensors_by_layer[layer.name] = x
-        out_tensors = (
-            [tensors_by_layer[name] for name in style_names] +
-            [tensors_by_layer[content_name]]
+        outputs = (
+            [vgg.get_layer(name).output for name in self.style_layers] +
+            [vgg.get_layer(self.content_layer).output]
         )
-        self.model = tf.keras.Model(inputs=vgg.input, outputs=out_tensors)
+        self.model = tf.keras.Model(inputs=vgg.input, outputs=outputs)
 
     def generate_features(self):
         """
@@ -100,14 +80,10 @@ class NST:
         Sets style_features and gram_style_features from the style image's
         style-layer outputs and content_feature from the content image's
         content-layer output.
-        Images are scaled to [0, 1] then passed through VGG preprocessing
-        (ImageNet mean-centered BGR) before the network, matching VGG19.
+        Uses scaled tensors in [0, 1] as produced by scale_image.
         """
         n_style = len(self.style_layers)
-        vgg19 = tf.keras.applications.vgg19
-        style_pre = vgg19.preprocess_input(self.style_image * 255.0)
-        content_pre = vgg19.preprocess_input(self.content_image * 255.0)
-        style_out = self.model(style_pre)
+        style_out = self.model(self.style_image)
         if not isinstance(style_out, (list, tuple)):
             style_list = [style_out]
         else:
@@ -116,7 +92,7 @@ class NST:
         self.gram_style_features = [
             self.gram_matrix(style_list[i]) for i in range(n_style)
         ]
-        content_out = self.model(content_pre)
+        content_out = self.model(self.content_image)
         if not isinstance(content_out, (list, tuple)):
             self.content_feature = content_out
         else:
