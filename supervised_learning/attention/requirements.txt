@@ -1,0 +1,3 @@
+# TensorFlow for attention / RNNEncoder checkpoints
+tensorflow>=2.12,<3
+numpy>=1.23

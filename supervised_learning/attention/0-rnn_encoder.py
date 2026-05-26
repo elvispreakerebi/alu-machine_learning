@@ -27,7 +27,7 @@ class RNNEncoder(tf.keras.layers.Layer):
             units=units,
             return_sequences=True,
             return_state=True,
-            recurrent_initializer=tf.keras.initializers.GlorotUniform(),
+            recurrent_initializer="glorot_uniform",
         )
 
     def initialize_hidden_state(self):
@@ -41,7 +41,8 @@ class RNNEncoder(tf.keras.layers.Layer):
             initial: ``(batch, units)`` initial GRU state.
 
         Returns:
-            Tuple ``(outputs, hidden)``: full sequence GRU outputs and last state.
+            Tuple ``(outputs, hidden)``: GRU outputs for the whole sequence and
+            the final hidden state.
         """
         embedded = self.embedding(x)
         outputs, hidden = self.gru(embedded, initial_state=initial)
