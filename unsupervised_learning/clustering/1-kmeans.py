@@ -3,8 +3,6 @@
 
 import numpy as np
 
-initialize = __import__('0-initialize').initialize
-
 
 def kmeans(X, k, iterations=1000):
     """
@@ -18,28 +16,22 @@ def kmeans(X, k, iterations=1000):
     Returns:
         Tuple (C, clss) of centroids and cluster assignments, or (None, None).
     """
-    if not isinstance(X, np.ndarray):
+    if type(X) is not np.ndarray or X.ndim != 2:
         return None, None
-    if len(X.shape) != 2:
+    if type(k) is not int or k <= 0:
         return None, None
-    if not isinstance(k, int) or k <= 0:
-        return None, None
-    if not isinstance(iterations, int) or iterations <= 0:
+    if type(iterations) is not int or iterations <= 0:
         return None, None
     if X.shape[0] < k:
         return None, None
 
     n, d = X.shape
-    C = initialize(X, k)
-    if C is None:
-        return None, None
-
-    low = X.min(axis=0)
-    high = X.max(axis=0)
+    low = np.min(X, axis=0)
+    high = np.max(X, axis=0)
+    C = np.random.uniform(low, high, (k, d))
 
     for _ in range(iterations):
-        dists = np.sum(
-            (X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
+        dists = np.sum((X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
         clss = np.argmin(dists, axis=1)
 
         one_hot = np.zeros((n, k))
@@ -47,21 +39,17 @@ def kmeans(X, k, iterations=1000):
         counts = one_hot.sum(axis=0)
         C_new = np.zeros((k, d))
         nonempty = counts > 0
-        C_new[nonempty] = (
-            (one_hot.T @ X)[nonempty] / counts[nonempty, np.newaxis]
-        )
+        C_new[nonempty] = (one_hot.T @ X)[nonempty] / counts[nonempty, np.newaxis]
 
         empty = np.where(counts == 0)[0]
-        if len(empty) > 0:
-            C_new[empty] = np.random.uniform(
-                low, high, size=(len(empty), d))
+        if empty.size > 0:
+            C_new[empty] = np.random.uniform(low, high, (empty.size, d))
 
         if np.allclose(C_new, C):
             return C_new, clss
 
         C = C_new
 
-    dists = np.sum(
-        (X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
+    dists = np.sum((X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
     clss = np.argmin(dists, axis=1)
     return C, clss
