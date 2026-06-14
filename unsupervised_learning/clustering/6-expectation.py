@@ -33,6 +33,12 @@ def expectation(X, pi, m, S):
     k = pi.shape[0]
     if m.shape != (k, d) or S.shape != (k, d, d):
         return None, None
+    if np.any(pi < 0):
+        return None, None
+    if not np.all(np.isfinite(pi)):
+        return None, None
+    if not np.allclose(np.sum(pi), 1):
+        return None, None
 
     prob = np.zeros((k, n))
     for j in range(k):
