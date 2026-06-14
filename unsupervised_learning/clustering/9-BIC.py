@@ -23,48 +23,47 @@ def BIC(X, kmin=1, kmax=None, iterations=1000, tol=1e-5, verbose=False):
         l and b are arrays of log likelihoods and BIC values per k tested,
         or (None, None, None, None) on failure.
     """
-    if not isinstance(X, np.ndarray) or len(X.shape) != 2:
-        return None, None, None, None
-    if not isinstance(kmin, int) or kmin <= 0:
-        return None, None, None, None
-    if not isinstance(iterations, int) or iterations <= 0:
-        return None, None, None, None
-    if not isinstance(tol, (int, float)) or tol < 0:
-        return None, None, None, None
-    if not isinstance(verbose, bool):
-        return None, None, None, None
+    fail = (None, None, None, None)
+    if (
+            type(X) is not np.ndarray or
+            len(X.shape) != 2 or
+            type(kmin) is not int or
+            kmin < 1):
+        return fail
 
     n, d = X.shape
     if kmax is None:
         kmax = n
-    if not isinstance(kmax, int) or kmax <= 0:
-        return None, None, None, None
-    if kmax < kmin:
-        return None, None, None, None
-    if kmax > n:
-        return None, None, None, None
+    if (
+            type(kmax) is not int or
+            kmax < 1 or
+            kmax < kmin + 1 or
+            type(iterations) is not int or
+            iterations < 1 or
+            type(tol) is not float or
+            tol < 0 or
+            type(verbose) is not bool):
+        return fail
 
-    size = kmax - kmin + 1
-    log_l = np.zeros(size)
-    bics = np.zeros(size)
-    best_k = None
-    best_result = None
-    best_bic = np.inf
+    log_l = []
+    bics = []
+    results = []
 
-    for idx, k in enumerate(range(kmin, kmax + 1)):
+    for k in range(kmin, kmax + 1):
         pi, m, S, _, ll = expectation_maximization(
             X, k, iterations, tol, verbose)
         if pi is None:
-            return None, None, None, None
+            return fail
 
-        log_l[idx] = ll
-        p = (k - 1) + k * d + k * (d * (d + 1) // 2)
-        bic = p * np.log(n) - 2 * ll
-        bics[idx] = bic
+        results.append((pi, m, S))
+        log_l.append(ll)
+        p = k * (d + 2) * (d + 1) / 2 - 1
+        bics.append(np.log(n) * p - 2 * ll)
 
-        if bic < best_bic:
-            best_bic = bic
-            best_k = k
-            best_result = (pi, m, S)
-
-    return best_k, best_result, log_l, bics
+    best_index = np.argmin(bics)
+    return (
+        kmin + best_index,
+        results[best_index],
+        np.array(log_l),
+        np.array(bics),
+    )
