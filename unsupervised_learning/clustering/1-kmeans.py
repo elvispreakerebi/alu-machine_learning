@@ -31,7 +31,8 @@ def kmeans(X, k, iterations=1000):
     C = np.random.uniform(low, high, (k, d))
 
     for _ in range(iterations):
-        dists = np.sum((X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
+        diff = X[:, np.newaxis, :] - C[np.newaxis, :, :]
+        dists = np.sum(diff ** 2, axis=2)
         clss = np.argmin(dists, axis=1)
 
         one_hot = np.zeros((n, k))
@@ -39,7 +40,9 @@ def kmeans(X, k, iterations=1000):
         counts = one_hot.sum(axis=0)
         C_new = np.zeros((k, d))
         nonempty = counts > 0
-        C_new[nonempty] = (one_hot.T @ X)[nonempty] / counts[nonempty, np.newaxis]
+        C_new[nonempty] = (
+            (one_hot.T @ X)[nonempty] / counts[nonempty, np.newaxis]
+        )
 
         empty = np.where(counts == 0)[0]
         if empty.size > 0:
@@ -50,6 +53,7 @@ def kmeans(X, k, iterations=1000):
 
         C = C_new
 
-    dists = np.sum((X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
+    diff = X[:, np.newaxis, :] - C[np.newaxis, :, :]
+    dists = np.sum(diff ** 2, axis=2)
     clss = np.argmin(dists, axis=1)
     return C, clss
