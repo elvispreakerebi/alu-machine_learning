@@ -29,4 +29,4 @@ def variance(X, C):
 
     dists = np.sum((X[:, np.newaxis, :] - C[np.newaxis, :, :]) ** 2, axis=2)
     clss = np.argmin(dists, axis=1)
-    return float(np.sum(dists[np.arange(X.shape[0]), clss]))
+    return np.sum(dists[np.arange(X.shape[0]), clss])
