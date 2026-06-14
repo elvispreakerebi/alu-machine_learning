@@ -3,8 +3,63 @@
 
 import numpy as np
 
-forward = __import__('3-forward').forward
-backward = __import__('5-backward').backward
+
+def forward(Observation, Emission, Transition, Initial):
+    """
+    Perform the forward algorithm for a hidden Markov model.
+
+    Args:
+        Observation: Observation indices of shape (T,).
+        Emission: Emission probabilities of shape (M, N).
+        Transition: Transition probabilities of shape (M, M).
+        Initial: Initial state probabilities of shape (M, 1).
+
+    Returns:
+        Tuple (P, F) where P is the likelihood and F is shape (M, T).
+    """
+    N = Emission.shape[0]
+    T = Observation.shape[0]
+    F = np.zeros((N, T))
+    F[:, 0] = Initial[:, 0] * Emission[:, Observation[0]]
+
+    for t in range(1, T):
+        F[:, t] = Emission[:, Observation[t]] * (
+            Transition.T @ F[:, t - 1]
+        )
+
+    return np.sum(F[:, -1]), F
+
+
+def backward(Observation, Emission, Transition, Initial):
+    """
+    Perform the backward algorithm for a hidden Markov model.
+
+    Args:
+        Observation: Observation indices of shape (T,).
+        Emission: Emission probabilities of shape (M, N).
+        Transition: Transition probabilities of shape (M, M).
+        Initial: Initial state probabilities of shape (M, 1).
+
+    Returns:
+        Tuple (P, B) where P is the likelihood and B is shape (M, T).
+    """
+    N = Emission.shape[0]
+    T = Observation.shape[0]
+    B = np.zeros((N, T))
+    B[:, -1] = 1
+
+    for t in range(T - 2, -1, -1):
+        B[:, t] = np.sum(
+            Transition
+            * Emission[:, Observation[t + 1]]
+            * B[:, t + 1],
+            axis=1
+        )
+
+    P = np.sum(
+        Initial[:, 0] * Emission[:, Observation[0]] * B[:, 0]
+    )
+    return P, B
 
 
 def baum_welch(Observations, Transition, Emission, Initial, iterations=1000):
