@@ -33,8 +33,6 @@ def maximization(X, g):
         return None, None, None
     if not np.all(np.isfinite(g)):
         return None, None, None
-    if not np.allclose(g.sum(axis=0), 1):
-        return None, None, None
 
     pi = N / n
     m = (g @ X) / N[:, np.newaxis]
